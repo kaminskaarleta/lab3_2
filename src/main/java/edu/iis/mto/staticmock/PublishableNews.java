@@ -21,4 +21,12 @@ public class PublishableNews {
 		this.subscribentContent.add(content);	
 	}
 
+	public List<String> getPublicContent() {
+		return publicContent;
+	}
+
+	public List<String> getSubscribentContent() {
+		return subscribentContent;
+	}
+	
 }
