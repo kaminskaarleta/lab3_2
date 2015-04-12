@@ -6,7 +6,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import edu.iis.mto.staticmock.Configuration;
 import edu.iis.mto.staticmock.ConfigurationLoader;
@@ -21,8 +23,9 @@ import static org.powermock.api.mockito.PowerMockito.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest( SingletonService.class )
+@RunWith(PowerMockRunner.class)
+@PrepareForTest( { ConfigurationLoader.class, NewsReaderFactory.class } )
+
 public class NewsLoaderTest {
 
 	@BeforeClass
@@ -34,7 +37,7 @@ public class NewsLoaderTest {
 	}
 
 	@Test
-	public void test() {
+	public void stateTest_validateSegregationTypesOfNews() {
 		mockStatic(ConfigurationLoader.class);
 		mockStatic(NewsReaderFactory.class);
 		
@@ -43,7 +46,7 @@ public class NewsLoaderTest {
 		incomingNews.add(mockIncomingInfo(SubsciptionType.A));
 		incomingNews.add(mockIncomingInfo(SubsciptionType.A));
 		incomingNews.add(mockIncomingInfo(SubsciptionType.B));
-		incomingNews.add(mockIncomingInfo(SubsciptionType.C));
+		incomingNews.add(mockIncomingInfo(SubsciptionType.NONE));
 
 		
 		ConfigurationLoader configurationLoader = mock(ConfigurationLoader.class);
@@ -55,7 +58,7 @@ public class NewsLoaderTest {
 		when(ConfigurationLoader.getInstance()).thenReturn(configurationLoader);
 		when(ConfigurationLoader.getInstance().loadConfiguration()).thenReturn(config);
 		
-		when(NewsReaderFactory.getReader(config.getReaderType())).thenReturn(reader);
+		when(NewsReaderFactory.getReader(Mockito.anyString())).thenReturn(reader);
 		when(reader.read()).thenReturn(incomingNews);
 		
 		PublishableNews publishableNews = newsLoader.loadNews();
@@ -64,8 +67,9 @@ public class NewsLoaderTest {
 	private IncomingInfo mockIncomingInfo(SubsciptionType type){
 		
 		IncomingInfo incomingInfo = mock(IncomingInfo.class);
+		when(incomingInfo.requiresSubsciption()).thenReturn(type != SubsciptionType.NONE);
 		when(incomingInfo.getSubscriptionType()).thenReturn(type);
-		
+
 		return incomingInfo;
 	}
 }
